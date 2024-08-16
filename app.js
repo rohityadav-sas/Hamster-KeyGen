@@ -10,8 +10,12 @@ const axios = require('axios');
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-    const response = await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook?url=https://hamster-keygen.onrender.com/`);
-    res.send(response.data);
+    try {
+        const response = await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook?url=https://hamster-keygen.onrender.com/`);
+        res.send(response.data);
+    } catch (error) {
+        res.send(error.response.data);
+    }
 });
 
 app.post(`/`, (req, res) => {
