@@ -85,5 +85,3 @@ bot.onText('/users', async (msg) => {
     );
     bot.sendMessage(msg.chat.id, list.join('\n'));
 });
-
-getAllKeys();
