@@ -118,6 +118,7 @@ bot.onText('/generatekeys', async (msg) => {
         bot.sendMessage(msg.chat.id, 'Keys have been generated!');
     }
     catch (error) {
+        console.log(error);
         bot.sendMessage(msg.chat.id, error.message);
         bot.sendMessage(msg.chat.id, 'An error occurred while generating keys');
     }
