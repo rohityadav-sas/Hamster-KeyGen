@@ -26,8 +26,12 @@ app.listen(process.env.PORT, () => {
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
 
 
-async function sendKeys(msg, filePath) {
+async function sendKeys(msg, filePath, command) {
     let keys = JSON.parse(fs.readFileSync(filePath));
+    if (keys.length === 0) {
+        bot.sendMessage(msg.chat.id, `No ${command.replace('/', '')} keys available`);
+        return;
+    }
     let keysToSend = keys.slice(0, 4);
     keysToSend.forEach(key => bot.sendMessage(msg.chat.id, key));
     fs.writeFileSync(filePath, JSON.stringify(keys.slice(4), null, 2));
@@ -58,16 +62,17 @@ const commands = {
     '/cube': 'Cube_keys.json',
     '/clone': 'Clone_keys.json',
     '/train': 'Train_keys.json',
-    '/merge': 'Merge_keys.json'
+    '/merge': 'Merge_keys.json',
+    '/twerk': 'Twerk_keys.json'
 };
 
 Object.entries(commands).forEach(([command, file]) => {
     bot.onText(new RegExp(command), async (msg) => {
-        await sendKeys(msg, path.join(__dirname, 'Keys', file));
+        await sendKeys(msg, path.join(__dirname, 'Keys', file), command);
     });
 });
 
-const keysFiles = ['Bike_keys.json', 'Cube_keys.json', 'Clone_keys.json', 'Train_keys.json', 'Merge_keys.json'];
+const keysFiles = ['Bike_keys.json', 'Cube_keys.json', 'Clone_keys.json', 'Train_keys.json', 'Merge_keys.json', 'Twerk_keys.json'];
 
 bot.onText('/remaining', async (msg) => {
     const remaining = await Promise.all(keysFiles.map(async file => {
