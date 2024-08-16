@@ -23,7 +23,7 @@ app.listen(process.env.PORT, () => {
     console.log(`Example app listening at http://localhost:${process.env.PORT}`);
 })
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 
 async function sendKeys(msg, filePath, command) {
@@ -72,6 +72,20 @@ Object.entries(commands).forEach(([command, file]) => {
     });
 });
 
+Object.entries(commands).forEach(([game, file]) => {
+    let command = `/generate${game.replace('/', '')}keys`;
+    bot.onText(new RegExp(command), async (msg) => {
+        bot.sendMessage(msg.chat.id, `Generating ${game.replace('/', '')} keys...`);
+        try {
+            await getKeys(game.replace('/', '').charAt(0).toUpperCase() + game.slice(2), 4);
+            bot.sendMessage(msg.chat.id, `${game.replace('/', '').charAt(0).toUpperCase() + game.slice(2)} keys have been generated!`);
+        }
+        catch (error) {
+            bot.sendMessage(msg.chat.id, `An error occurred while generating ${game.replace('/', '').charAt(0).toUpperCase() + game.slice(2)} keys`);
+        }
+    });
+});
+
 const keysFiles = ['Bike_keys.json', 'Cube_keys.json', 'Clone_keys.json', 'Train_keys.json', 'Merge_keys.json', 'Twerk_keys.json'];
 
 bot.onText('/remaining', async (msg) => {
@@ -101,3 +115,5 @@ bot.onText('/generatekeys', async (msg) => {
         bot.sendMessage(msg.chat.id, 'An error occurred while generating keys');
     }
 })
+
+
