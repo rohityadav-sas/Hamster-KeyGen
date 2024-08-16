@@ -14,7 +14,7 @@ const loginClient = async (clientId, appToken) => {
         const response = await axios.post(urls.login, payload);
         return response.data.clientToken;
     } catch (error) {
-        throw new Error('error generating client token');
+        throw new Error(error);
     }
 }
 
