@@ -8,9 +8,9 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    console.log('received get request');
-    res.send('Hello World!');
+app.get('/', async (req, res) => {
+    const response = await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook?url=https://hamster-keygen.onrender.com/`);
+    res.send(response.data);
 });
 
 app.post(`/`, (req, res) => {
