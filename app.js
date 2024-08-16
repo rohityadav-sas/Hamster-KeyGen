@@ -23,8 +23,8 @@ app.listen(process.env.PORT, () => {
     console.log(`Example app listening at http://localhost:${process.env.PORT}`);
 })
 
-
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+
 
 async function sendKeys(msg, filePath) {
     let keys = JSON.parse(fs.readFileSync(filePath));
@@ -85,3 +85,14 @@ bot.onText('/users', async (msg) => {
     );
     bot.sendMessage(msg.chat.id, list.join('\n'));
 });
+
+bot.onText('/generatekeys', async (msg) => {
+    bot.sendMessage(msg.chat.id, 'Generating Keys...');
+    try {
+        await getAllKeys();
+        bot.sendMessage(msg.chat.id, 'Keys have been generated!');
+    }
+    catch (error) {
+        bot.sendMessage(msg.chat.id, 'An error occurred while generating keys');
+    }
+})
