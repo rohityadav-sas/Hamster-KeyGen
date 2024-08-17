@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getKeys, getAllKeys } = require('./tokenGeneration');
+const { getKeys } = require('./tokenGeneration');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
@@ -112,15 +112,25 @@ bot.onText('/users', async (msg) => {
 });
 
 bot.onText('/generatekeys', async (msg) => {
-    bot.sendMessage(msg.chat.id, 'Generating Keys...');
     try {
-        await getAllKeys();
-        bot.sendMessage(msg.chat.id, 'Keys have been generated!');
+        bot.sendMessage(msg.chat.id, 'Generating Bike Keys...');
+        await getKeys('Bike', 4);
+        bot.sendMessage(msg.chat.id, 'Generating Cube Keys...');
+        await getKeys('Cube', 4);
+        bot.sendMessage(msg.chat.id, 'Generating Clone Keys...');
+        await getKeys('Clone', 4);
+        bot.sendMessage(msg.chat.id, 'Generating Train Keys...');
+        await getKeys('Train', 4);
+        bot.sendMessage(msg.chat.id, 'Generating Merge Keys...');
+        await getKeys('Merge', 4);
+        bot.sendMessage(msg.chat.id, 'Generating Twerk Keys...');
+        await getKeys('Twerk', 4);
+        bot.sendMessage(msg.chat.id, 'All Keys have been generated!');
     }
     catch (error) {
         console.log(error);
-        bot.sendMessage(msg.chat.id, error.message);
-        bot.sendMessage(msg.chat.id, 'An error occurred while generating keys');
+        bot.sendMessage(msg.chat.id, error);
+        bot.sendMessage(msg.chat.id, 'Error generating keys');
     }
 })
 

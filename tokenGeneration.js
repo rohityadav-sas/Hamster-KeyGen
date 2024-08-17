@@ -14,7 +14,7 @@ const loginClient = async (clientId, appToken) => {
         const response = await axios.post(urls.login, payload);
         return response.data.clientToken;
     } catch (error) {
-        throw new Error(error);
+        console.log(error.response.statusText);
     }
 }
 
@@ -82,12 +82,4 @@ async function getKeys(game, numberOfKeys) {
     }
 }
 
-async function getAllKeys() {
-    const tasks = [];
-    for (const game in games) {
-        tasks.push(getKeys(game, 4));
-    }
-    await Promise.all(tasks);
-}
-
-module.exports = { getKeys, getAllKeys };
+module.exports = { getKeys };
