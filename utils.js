@@ -38,4 +38,16 @@ const sleep = async (time) => {
     })
 };
 
-module.exports = { games, urls, sleep };
+const commands = {
+    '/bike': 'Bike_keys.json',
+    '/cube': 'Cube_keys.json',
+    '/clone': 'Clone_keys.json',
+    '/train': 'Train_keys.json',
+    '/merge': 'Merge_keys.json',
+    '/twerk': 'Twerk_keys.json'
+};
+
+const keysFiles = ['Bike_keys.json', 'Cube_keys.json', 'Twerk_keys.json', 'Train_keys.json', 'Merge_keys.json', 'Clone_keys.json'];
+
+
+module.exports = { games, urls, sleep, commands, keysFiles };

@@ -52,7 +52,8 @@ const createToken = async (clientToken, promoId) => {
     }
 };
 
-async function getKeys(game, numberOfKeys) {
+async function getKeys(game, numberOfKeys, userID) {
+    const filePath = path.join(__dirname, 'Keys', `${game}_keys.json`);
     const tasks = [];
     let generatedKeys = [];
     for (let i = 0; i < numberOfKeys; i++) {
@@ -71,15 +72,23 @@ async function getKeys(game, numberOfKeys) {
         })());
     }
     await Promise.all(tasks);
-    console.log(`${game} keys: `, generatedKeys);
-    if (!fs.existsSync(path.join(__dirname, 'Keys', `${game}_keys.json`))) {
-        fs.writeFileSync(path.join(__dirname, 'Keys', `${game}_keys.json`), JSON.stringify(generatedKeys, null, 2));
+    console.log('\x1b[32m%s\x1b[0m', `${game} keys generated`);
+    let existingKeys = JSON.parse(fs.readFileSync(filePath));
+    let userFound = false;
+    for (let [key, value] of Object.entries(existingKeys)) {
+        if (key === userID) {
+            existingKeys[key] = [...value, ...generatedKeys];
+            fs.writeFileSync(filePath, JSON.stringify(existingKeys, null, 2));
+            userFound = true;
+            break;
+        }
     }
-    else {
-        const existingKeys = JSON.parse(fs.readFileSync(path.join(__dirname, 'Keys', `${game}_keys.json`)))
-        const updatedKeys = [...existingKeys, ...generatedKeys];
-        fs.writeFileSync(path.join(__dirname, 'Keys', `${game}_keys.json`), JSON.stringify(updatedKeys, null, 2));
+
+    if (!userFound) {
+        existingKeys[userID] = generatedKeys;
+        fs.writeFileSync(filePath, JSON.stringify(existingKeys, null, 2));
     }
+
 }
 
 module.exports = { getKeys };
