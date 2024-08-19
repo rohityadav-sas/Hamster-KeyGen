@@ -82,19 +82,7 @@ bot.onText(new RegExp('.'), (msg) => {
     if ((msg.chat.id).toString() !== admin) {
         bot.sendMessage(admin, `${msg.chat.first_name} sent a message: ${msg.text}`);
     }
-    const userInfo = {
-        id: msg.chat.id,
-        username: msg.chat.username,
-        first_name: msg.chat.first_name,
-        last_name: msg.chat.last_name
-    };
-    const filePath = path.join(__dirname, 'Keys', 'Bot_Users.json');
-    const existingUsers = JSON.parse(fs.readFileSync(filePath));
-    if (!existingUsers.some(user => user.id === userInfo.id)) {
-        existingUsers.push(userInfo);
-        fs.writeFileSync(filePath, JSON.stringify(existingUsers, null, 2));
-    }
-})
+});
 
 bot.onText('/start', (msg) => {
     bot.sendMessage(msg.chat.id, 'Welcome to the Hamster Key Generator Bot!');
