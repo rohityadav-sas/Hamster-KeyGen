@@ -8,7 +8,7 @@ const app = express();
 const axios = require('axios');
 const admin = '7070127929';
 const { commands, keysFiles } = require('./utils');
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 
 app.use(express.json());
