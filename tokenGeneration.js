@@ -14,7 +14,7 @@ const loginClient = async (clientId, appToken) => {
         const response = await axios.post(urls.login, payload);
         return response.data.clientToken;
     } catch (error) {
-        console.log(error.response.statusText);
+        return error.response.data.error_message;
     }
 }
 
@@ -54,6 +54,9 @@ const createToken = async (clientToken, promoId) => {
 
 async function getKeys(game, numberOfKeys, userID) {
     const filePath = path.join(__dirname, 'Keys', `${game}_keys.json`);
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, '{}');
+    }
     const tasks = [];
     let generatedKeys = [];
     for (let i = 0; i < numberOfKeys; i++) {
@@ -63,7 +66,7 @@ async function getKeys(game, numberOfKeys, userID) {
             // await sleep(20);
             while (hasCode === 'TooManyRegister' || !hasCode) {
                 console.error(`${game}: ${hasCode}. Retrying again in 20 seconds`);
-                await sleep(40);
+                await sleep(20);
                 hasCode = await registerEvent(clientToken, games[game].promoId);
             }
             if (hasCode) {
@@ -71,7 +74,6 @@ async function getKeys(game, numberOfKeys, userID) {
                 generatedKeys.push(key);
             }
         })());
-        await sleep(4);
     }
     await Promise.all(tasks);
     console.log('\x1b[32m%s\x1b[0m', `${game} keys generated`);

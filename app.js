@@ -50,7 +50,7 @@ app.listen(process.env.PORT, () => {
 
 
 
-async function sendKeys(msg, filePath, command) {
+async function sendKeys(msg, filePath) {
     let keys = JSON.parse(fs.readFileSync(filePath));
     let userFound = false;
     let userKeys = [];
@@ -64,17 +64,29 @@ async function sendKeys(msg, filePath, command) {
         if (userKeys.length > 0) {
             let keysToSend = userKeys.slice(0, 4);
             keysToSend.forEach(element => {
-                bot.sendMessage(msg.chat.id, element);
+                bot.sendMessage(msg.chat.id, `\`${element}\``, {
+                    parse_mode: 'Markdown',
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                {
+                                    text: '🗑️',
+                                    callback_data: 'delete'
+                                }
+                            ]
+                        ]
+                    }
+                });
             });
             keys[msg.chat.id] = userKeys.slice(4);
             fs.writeFileSync(filePath, JSON.stringify(keys, null, 2));
         }
         else {
-            bot.sendMessage(msg.chat.id, 'You have no keys left. Generate keys first');
+            bot.sendMessage(msg.chat.id, 'You have no keys left. Use /generatekeys to generate keys');
         }
     }
     else {
-        bot.sendMessage(msg.chat.id, 'You have no keys left. Generate keys first');
+        bot.sendMessage(msg.chat.id, 'You have no keys left. Use /generatekeys to generate keys');
     }
 }
 
@@ -105,36 +117,18 @@ bot.onText('/start', (msg) => {
     informAdmin(msg, `${msg.chat.first_name} started the bot`);
 });
 
-Object.entries(commands).forEach(([game, file]) => {
-    let command = `/generate${game.replace('/', '')}keys`;
-    bot.onText(new RegExp(command), async (msg) => {
-        bot.sendMessage(msg.chat.id, `Generating ${game.replace('/', '')} keys...`);
-        informAdmin(msg, `${msg.chat.first_name} requested to generate ${game.replace('/', '')} keys`);
-        try {
-            await getKeys(game.replace('/', '').charAt(0).toUpperCase() + game.slice(2), 4, msg.chat.id);
-            bot.sendMessage(msg.chat.id, `${game.replace('/', '').charAt(0).toUpperCase() + game.slice(2)} keys have been generated!`);
-            if ((msg.chat.id).toString() !== admin) {
-                bot.sendMessage(admin, `${msg.chat.first_name} successfully generated ${game.replace('/', '')} keys`);
-            }
-        }
-        catch (error) {
-            bot.sendMessage(msg.chat.id, `An error occurred while generating ${game.replace('/', '').charAt(0).toUpperCase() + game.slice(2)} keys`);
-        }
-    });
-});
-
-
 bot.onText('/remaining', async (msg) => {
     const keys = [];
     let userFound = false;
     keysFiles.forEach(file => {
         const filePath = path.join(__dirname, 'Keys', file);
+        if (!fs.existsSync(filePath)) {
+            fs.writeFileSync(filePath, '{}');
+        }
         const data = JSON.parse(fs.readFileSync(filePath));
         for (const [key, value] of Object.entries(data)) {
             if (key === msg.chat.id.toString()) {
-                keys.push(
-                    `${file.replace('_keys.json', '')}: ${value.length}`
-                );
+                keys.push(`${file.replace('_keys.json', '')}: ${value.length}`);
                 userFound = true;
             }
         }
@@ -165,31 +159,35 @@ bot.onText('/users', async (msg) => {
     }
 });
 
-bot.onText('/generatekeys', async (msg) => {
+async function generateAllKeys(msg) {
     const tasks = [];
     let batchSize = 2;
     const keyTypes = Object.keys(games);
     for (const keyType of keyTypes) {
-        tasks.push(() => new TrackedPromise(getKeys(keyType, 4, msg.chat.id)));
+        tasks.push(() => new TrackedPromise(getKeys(keyType, 4, msg.chat.id), keyType));
     }
     informAdmin(msg, `${msg.chat.first_name} requested to generate all keys`);
     try {
-        let activeTasks = [];
-        let index = 0;
+        let activeTasks = [], index = 0, messageIds = [];
         while (index < tasks.length) {
             if (activeTasks.length < batchSize) {
                 activeTasks.push(tasks[index]());
-                if (activeTasks.length != batchSize) { await sleep(20); }
+                let message = await bot.sendMessage(msg.chat.id, `Generating ${keyTypes[index]} keys...`);
+                messageIds.push({
+                    keyType: keyTypes[index],
+                    messageId: message.message_id
+                });
+                if (activeTasks.length != batchSize) { await sleep(10); }
                 index++;
             }
             else {
                 await Promise.race(activeTasks.map(task => task.promise));
                 activeTasks = activeTasks.filter(task => {
-                    if (task.isPending()) {
-                        return true;
-                    }
+                    if (task.isPending()) { return true; }
                     else {
-                        bot.sendMessage(msg.chat.id, `${keyTypes[index]} keys have been generated!`);
+                        bot.sendMessage(msg.chat.id, `${task.getGame()} keys have been generated!`);
+                        let toDeleteMsg = messageIds.find(message => message.keyType === task.getGame());
+                        bot.deleteMessage(msg.chat.id, toDeleteMsg.messageId);
                         return false;
                     }
                 });
@@ -201,4 +199,58 @@ bot.onText('/generatekeys', async (msg) => {
         console.error(error);
         bot.sendMessage(msg.chat.id, 'Error generating keys: ' + error);
     }
+}
+
+function showInlineKeyboard(type) {
+    const game = Object.keys(games);
+    if (type === 'generate') { game.push('All') }
+    const buttonsPerRow = 3;
+    let rows = [];
+    for (let i = 0; i < game.length; i += buttonsPerRow) {
+        const row = game.slice(i, i + buttonsPerRow).map(g => ({
+            text: g,
+            callback_data: type === 'get' ? g : `generate${g}`
+        }));
+        rows.push(row);
+    }
+    return rows;
+}
+
+bot.onText('/getkeys', (msg) => {
+    let rows = showInlineKeyboard('get');
+    bot.sendMessage(msg.chat.id, 'Select a game to get keys', {
+        reply_markup: {
+            inline_keyboard: rows
+        }
+    });
+});
+
+bot.onText('/generatekeys', (msg) => {
+    let rows = showInlineKeyboard('generate');
+    bot.sendMessage(msg.chat.id, 'Select a game to generate keys', {
+        reply_markup: {
+            inline_keyboard: rows
+        }
+    });
+});
+
+
+
+bot.on('callback_query', (callbackQuery) => {
+    const msg = callbackQuery.message;
+    const data = callbackQuery.data;
+    if (data.startsWith('generate')) {
+        const game = data.replace('generate', '');
+        if (game === 'All') { generateAllKeys(msg) } else {
+            bot.sendMessage(msg.chat.id, `Generating ${game} keys...`);
+            getKeys(game, 4, msg.chat.id);
+        };
+    }
+    else if (data === 'delete') {
+        bot.deleteMessage(msg.chat.id, msg.message_id);
+    }
+    else {
+        sendKeys(msg, path.join(__dirname, 'Keys', `${data}_keys.json`));
+    }
+    bot.answerCallbackQuery(callbackQuery.id);
 });

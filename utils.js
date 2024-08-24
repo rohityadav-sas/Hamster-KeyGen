@@ -1,13 +1,12 @@
 const games = {
-    'Bike': {
-        appToken: 'd28721be-fd2d-4b45-869e-9f253b554e50',
-        promoId: '43e35910-c168-4634-ad4f-52fd764a843f',
-    },
     'Cube': {
         appToken: 'd1690a07-3780-4068-810f-9b5bbf2931b2',
         promoId: 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
     },
-
+    'Bike': {
+        appToken: 'd28721be-fd2d-4b45-869e-9f253b554e50',
+        promoId: '43e35910-c168-4634-ad4f-52fd764a843f',
+    },
     'Train': {
         appToken: '82647f43-3f87-402d-88dd-09a90025313f',
         promoId: 'c4480ac7-e178-4973-8061-9ed5b2e17954',
@@ -52,8 +51,9 @@ const sleep = async (time) => {
 };
 
 class TrackedPromise {
-    constructor(promise) {
+    constructor(promise, game) {
         this.state = 'pending';
+        this.game = game;
         this.promise = promise.then(value => {
             this.state = 'fulfilled';
             return value;
@@ -64,6 +64,9 @@ class TrackedPromise {
     }
     isPending() {
         return this.state === 'pending';
+    }
+    getGame() {
+        return this.game;
     }
 } // To check if a promise is still pending
 
@@ -80,7 +83,12 @@ const path = require('path');
 async function emptyKeysFiles() {
     keysFiles.forEach(file => {
         const filePath = path.join(__dirname, 'Keys', file);
-        fs.writeFileSync(filePath, '{}');
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error(err);
+            }
+            console.log(`${file} deleted`);
+        });
     });
 }
 // emptyKeysFiles();
