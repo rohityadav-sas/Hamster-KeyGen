@@ -10,8 +10,8 @@ const admin = '7070127929';
 const { games, commands, keysFiles, sleep, TrackedPromise } = require('./utils');
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log(`Server running on port 3000`);
+app.listen(3000, () => {
+    console.log('\x1b[32m%s\x1b[0m', `Server running on port 3000`);
 })
 
 async function sendKeys(msg, filePath) {
