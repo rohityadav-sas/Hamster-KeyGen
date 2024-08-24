@@ -1,8 +1,8 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve('.env') });
 const { getKeys } = require('./tokenGeneration');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
-const path = require('path');
 const express = require('express');
 const app = express();
 const axios = require('axios');
