@@ -112,6 +112,10 @@ bot.onText('/remaining', async (msg) => {
 bot.onText('/users', async (msg) => {
     if (msg.chat.id.toString() === admin) {
         const users = JSON.parse(fs.readFileSync(path.join(__dirname, 'Keys', 'Bot_Users.json')));
+        if (users.length === 0) {
+            bot.sendMessage(msg.chat.id, 'No users found');
+            return;
+        }
         const list = users.map(user =>
             `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}${user.username ? `: @${user.username}` : ''}`
         );
