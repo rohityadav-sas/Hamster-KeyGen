@@ -59,7 +59,8 @@ async function getKeys(game, numberOfKeys, userID) {
     for (let i = 0; i < numberOfKeys; i++) {
         tasks.push((async () => {
             const clientToken = await loginClient(uuidv4(), games[game].appToken);
-            let hasCode = await registerEvent(clientToken, games[game].promoId);
+            let hasCode = false;
+            // await sleep(20);
             while (hasCode === 'TooManyRegister' || !hasCode) {
                 console.error(`${game}: ${hasCode}. Retrying again in 20 seconds`);
                 await sleep(20);
@@ -76,19 +77,17 @@ async function getKeys(game, numberOfKeys, userID) {
     let existingKeys = JSON.parse(fs.readFileSync(filePath));
     let userFound = false;
     for (let [key, value] of Object.entries(existingKeys)) {
-        if (key === userID) {
+        if (key === userID.toString()) {
             existingKeys[key] = [...value, ...generatedKeys];
             fs.writeFileSync(filePath, JSON.stringify(existingKeys, null, 2));
             userFound = true;
             break;
         }
     }
-
     if (!userFound) {
         existingKeys[userID] = generatedKeys;
         fs.writeFileSync(filePath, JSON.stringify(existingKeys, null, 2));
     }
-
 }
 
 module.exports = { getKeys };

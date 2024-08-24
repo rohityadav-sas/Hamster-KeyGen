@@ -7,10 +7,7 @@ const games = {
         appToken: 'd1690a07-3780-4068-810f-9b5bbf2931b2',
         promoId: 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
     },
-    'Clone': {
-        appToken: '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
-        promoId: 'fe693b26-b342-4159-8808-15e3ff7f8767',
-    },
+
     'Train': {
         appToken: '82647f43-3f87-402d-88dd-09a90025313f',
         promoId: 'c4480ac7-e178-4973-8061-9ed5b2e17954',
@@ -22,8 +19,24 @@ const games = {
     'Twerk': {
         appToken: '61308365-9d16-4040-8bb0-2f4a4c69074c',
         promoId: '61308365-9d16-4040-8bb0-2f4a4c69074c'
+    },
+    'Polysphere': {
+        appToken: '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
+        promoId: '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71'
+    },
+    'Mow': {
+        appToken: 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
+        promoId: 'ef319a80-949a-492e-8ee0-424fb5fc20a6'
+    },
+    'Mud': {
+        appToken: '8814a785-97fb-4177-9193-ca4180ff9da8',
+        promoId: '8814a785-97fb-4177-9193-ca4180ff9da8'
+    },
+    'Clone': {
+        appToken: '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
+        promoId: 'fe693b26-b342-4159-8808-15e3ff7f8767',
     }
-};
+}
 const urls = {
     login: 'https://api.gamepromo.io/promo/login-client',
     register: 'https://api.gamepromo.io/promo/register-event',
@@ -38,16 +51,41 @@ const sleep = async (time) => {
     })
 };
 
-const commands = {
-    '/bike': 'Bike_keys.json',
-    '/cube': 'Cube_keys.json',
-    '/clone': 'Clone_keys.json',
-    '/train': 'Train_keys.json',
-    '/merge': 'Merge_keys.json',
-    '/twerk': 'Twerk_keys.json'
-};
+class TrackedPromise {
+    constructor(promise) {
+        this.state = 'pending';
+        this.promise = promise.then(value => {
+            this.state = 'fulfilled';
+            return value;
+        }).catch(error => {
+            this.state = 'rejected';
+            throw error;
+        });
+    }
+    isPending() {
+        return this.state === 'pending';
+    }
+} // To check if a promise is still pending
 
-const keysFiles = ['Bike_keys.json', 'Cube_keys.json', 'Twerk_keys.json', 'Train_keys.json', 'Merge_keys.json', 'Clone_keys.json'];
+const commands = Object.entries(games).reduce((acc, [key, value]) => {
+    key = key.charAt(0).toLowerCase() + key.slice(1);
+    acc[`/${key}`] = `${key.charAt(0).toUpperCase() + key.slice(1)}_keys.json`;
+    return acc;
+}, {});
+
+const keysFiles = Object.entries(commands).map(([key, value]) => value);
+
+const fs = require('fs');
+const path = require('path');
+async function emptyKeysFiles() {
+    keysFiles.forEach(file => {
+        const filePath = path.join(__dirname, 'Keys', file);
+        fs.writeFileSync(filePath, '{}');
+    });
+}
+// emptyKeysFiles();
 
 
-module.exports = { games, urls, sleep, commands, keysFiles };
+
+
+module.exports = { games, urls, sleep, commands, keysFiles, TrackedPromise };

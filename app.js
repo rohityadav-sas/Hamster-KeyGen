@@ -7,7 +7,7 @@ const express = require('express');
 const app = express();
 const axios = require('axios');
 const admin = '7070127929';
-const { commands, keysFiles } = require('./utils');
+const { games, commands, keysFiles, sleep, TrackedPromise } = require('./utils');
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 
@@ -78,10 +78,14 @@ async function sendKeys(msg, filePath, command) {
     }
 }
 
-bot.onText(new RegExp('.'), (msg) => {
+const informAdmin = (msg, msgToSend) => {
     if ((msg.chat.id).toString() !== admin) {
-        bot.sendMessage(admin, `${msg.chat.first_name} sent a message: ${msg.text}`);
+        bot.sendMessage(admin, msgToSend);
     }
+}
+
+bot.onText(new RegExp('.'), (msg) => {
+    informAdmin(msg, `${msg.chat.first_name} sent a message: ${msg.text}`);
 });
 
 bot.onText('/start', (msg) => {
@@ -98,27 +102,14 @@ bot.onText('/start', (msg) => {
         existingUsers.push(userInfo);
         fs.writeFileSync(filePath, JSON.stringify(existingUsers, null, 2));
     }
-    if ((msg.chat.id).toString() !== admin) {
-        bot.sendMessage(admin, `${msg.chat.first_name} started the bot`);
-    }
-});
-
-Object.entries(commands).forEach(([command, file]) => {
-    bot.onText(new RegExp(command), async (msg) => {
-        await sendKeys(msg, path.join(__dirname, 'Keys', file), command);
-        if ((msg.chat.id).toString() !== admin) {
-            bot.sendMessage(admin, `${msg.chat.first_name} requested ${command.replace('/', '')} keys`);
-        }
-    });
+    informAdmin(msg, `${msg.chat.first_name} started the bot`);
 });
 
 Object.entries(commands).forEach(([game, file]) => {
     let command = `/generate${game.replace('/', '')}keys`;
     bot.onText(new RegExp(command), async (msg) => {
         bot.sendMessage(msg.chat.id, `Generating ${game.replace('/', '')} keys...`);
-        if ((msg.chat.id).toString() !== admin) {
-            bot.sendMessage(admin, `${msg.chat.first_name} requested to generate ${game.replace('/', '')} keys`);
-        }
+        informAdmin(msg, `${msg.chat.first_name} requested to generate ${game.replace('/', '')} keys`);
         try {
             await getKeys(game.replace('/', '').charAt(0).toUpperCase() + game.slice(2), 4, msg.chat.id);
             bot.sendMessage(msg.chat.id, `${game.replace('/', '').charAt(0).toUpperCase() + game.slice(2)} keys have been generated!`);
@@ -157,9 +148,7 @@ bot.onText('/remaining', async (msg) => {
         });
         bot.sendMessage(msg.chat.id, keys.join('\n'));
     }
-    if ((msg.chat.id).toString() !== admin) {
-        bot.sendMessage(admin, `${msg.chat.first_name} requested remaining keys`);
-    }
+    informAdmin(msg, `${msg.chat.first_name} requested remaining keys`);
 });
 
 bot.onText('/users', async (msg) => {
@@ -177,22 +166,30 @@ bot.onText('/users', async (msg) => {
 });
 
 bot.onText('/generatekeys', async (msg) => {
-    const keyTypes = ['Bike', 'Cube', 'Clone', 'Train', 'Merge', 'Twerk'];
-    if ((msg.chat.id).toString() !== admin) {
-        bot.sendMessage(admin, `${msg.chat.first_name} requested to generate all keys`);
+    const tasks = [];
+    let batchSize = 2;
+    const keyTypes = Object.keys(games);
+    for (const keyType of keyTypes) {
+        tasks.push(() => new TrackedPromise(getKeys(keyType, 4, msg.chat.id)));
     }
+    informAdmin(msg, `${msg.chat.first_name} requested to generate all keys`);
     try {
-        for (const keyType of keyTypes) {
-            bot.sendMessage(msg.chat.id, `Generating ${keyType} Keys...`);
-            await getKeys(keyType, 4, msg.chat.id);
+        let activeTasks = [];
+        let index = 0;
+        while (index < tasks.length) {
+            if (activeTasks.length < batchSize) {
+                activeTasks.push(tasks[index]());
+                index++;
+            }
+            else {
+                await Promise.race(activeTasks.map(task => task.promise));
+                activeTasks = activeTasks.filter(task => task.isPending());
+            }
         }
         bot.sendMessage(msg.chat.id, 'All Keys have been generated!');
-        bot.sendMessage(admin, `${msg.chat.first_name} successfully generated all keys`);
+        informAdmin(msg, `${msg.chat.first_name} successfully generated all keys`);
     } catch (error) {
         console.error(error);
         bot.sendMessage(msg.chat.id, 'Error generating keys: ' + error);
     }
 });
-
-
-
