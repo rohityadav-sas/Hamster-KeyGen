@@ -63,7 +63,7 @@ async function getKeys(game, numberOfKeys, userID) {
             // await sleep(20);
             while (hasCode === 'TooManyRegister' || !hasCode) {
                 console.error(`${game}: ${hasCode}. Retrying again in 20 seconds`);
-                await sleep(20);
+                await sleep(40);
                 hasCode = await registerEvent(clientToken, games[game].promoId);
             }
             if (hasCode) {

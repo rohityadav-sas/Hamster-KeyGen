@@ -179,11 +179,20 @@ bot.onText('/generatekeys', async (msg) => {
         while (index < tasks.length) {
             if (activeTasks.length < batchSize) {
                 activeTasks.push(tasks[index]());
+                if (activeTasks.length != batchSize) { await sleep(20); }
                 index++;
             }
             else {
                 await Promise.race(activeTasks.map(task => task.promise));
-                activeTasks = activeTasks.filter(task => task.isPending());
+                activeTasks = activeTasks.filter(task => {
+                    if (task.isPending()) {
+                        return true;
+                    }
+                    else {
+                        bot.sendMessage(msg.chat.id, `${keyTypes[index]} keys have been generated!`);
+                        return false;
+                    }
+                });
             }
         }
         bot.sendMessage(msg.chat.id, 'All Keys have been generated!');
