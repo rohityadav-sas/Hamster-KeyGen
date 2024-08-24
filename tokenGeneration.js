@@ -71,6 +71,7 @@ async function getKeys(game, numberOfKeys, userID) {
                 generatedKeys.push(key);
             }
         })());
+        await sleep(4);
     }
     await Promise.all(tasks);
     console.log('\x1b[32m%s\x1b[0m', `${game} keys generated`);
