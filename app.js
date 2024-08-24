@@ -10,45 +10,9 @@ const admin = '7070127929';
 const { games, commands, keysFiles, sleep, TrackedPromise } = require('./utils');
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
-
-app.use(express.json());
-
-app.get('/', async (req, res) => {
-    try {
-        const response = await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook?url=https://hamster-keygen.onrender.com/`);
-        res.send(response.data);
-    } catch (error) {
-        res.send(error.response.data);
-    }
-});
-
-app.get('/allkeys', async (req, res) => {
-    const keys = [];
-    keysFiles.forEach(file => {
-        const filePath = path.join(__dirname, 'Keys', file);
-        const keysArray = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath)) : [];
-        keys.push({ game: file.replace('_keys.json', ''), keys: keysArray });
-    });
-    res.json(keys);
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server running on port 3000`);
 })
-
-app.get('/users', async (req, res) => {
-    const users = JSON.parse(fs.readFileSync(path.join(__dirname, 'Keys', 'Bot_Users.json')));
-    res.json(users);
-})
-
-app.post(`/`, (req, res) => {
-    console.log('received post request');
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
-});
-
-
-app.listen(process.env.PORT, () => {
-    console.log(`Example app listening at http://localhost:${process.env.PORT}`);
-})
-
-
 
 async function sendKeys(msg, filePath) {
     let keys = JSON.parse(fs.readFileSync(filePath));
@@ -233,8 +197,6 @@ bot.onText('/generatekeys', (msg) => {
         }
     });
 });
-
-
 
 bot.on('callback_query', (callbackQuery) => {
     const msg = callbackQuery.message;

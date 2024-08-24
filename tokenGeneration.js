@@ -54,16 +54,14 @@ const createToken = async (clientToken, promoId) => {
 
 async function getKeys(game, numberOfKeys, userID) {
     const filePath = path.join(__dirname, 'Keys', `${game}_keys.json`);
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, '{}');
-    }
+    if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '{}') }
     const tasks = [];
     let generatedKeys = [];
     for (let i = 0; i < numberOfKeys; i++) {
         tasks.push((async () => {
             const clientToken = await loginClient(uuidv4(), games[game].appToken);
             let hasCode = false;
-            // await sleep(20);
+            await sleep(20);
             while (hasCode === 'TooManyRegister' || !hasCode) {
                 console.error(`${game}: ${hasCode}. Retrying again in 20 seconds`);
                 await sleep(20);

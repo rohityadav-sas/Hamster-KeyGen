@@ -78,22 +78,4 @@ const commands = Object.entries(games).reduce((acc, [key, value]) => {
 
 const keysFiles = Object.entries(commands).map(([key, value]) => value);
 
-const fs = require('fs');
-const path = require('path');
-async function emptyKeysFiles() {
-    keysFiles.forEach(file => {
-        const filePath = path.join(__dirname, 'Keys', file);
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                console.error(err);
-            }
-            console.log(`${file} deleted`);
-        });
-    });
-}
-// emptyKeysFiles();
-
-
-
-
 module.exports = { games, urls, sleep, commands, keysFiles, TrackedPromise };
