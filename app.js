@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve('.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { getKeys } = require('./tokenGeneration');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
