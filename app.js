@@ -85,9 +85,7 @@ bot.onText('/remaining', async (msg) => {
     let userFound = false;
     keysFiles.forEach(file => {
         const filePath = path.join(__dirname, 'Keys', file);
-        if (!fs.existsSync(filePath)) {
-            fs.writeFileSync(filePath, '{}');
-        }
+        if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '{}') }
         const data = JSON.parse(fs.readFileSync(filePath));
         for (const [key, value] of Object.entries(data)) {
             if (key === msg.chat.id.toString()) {
@@ -214,8 +212,9 @@ bot.on('callback_query', async (callbackQuery) => {
     if (data.startsWith('generate')) {
         const game = data.replace('generate', '');
         if (game === 'All') { generateAllKeys(msg) } else {
-            bot.sendMessage(msg.chat.id, `Generating ${game} keys...`);
+            let msgtodel = await bot.sendMessage(msg.chat.id, `Generating ${game} keys...`);
             await getKeys(game, 4, msg.chat.id);
+            bot.deleteMessage(msg.chat.id, msgtodel.message_id);
             bot.sendMessage(msg.chat.id, `${game} keys have been generated!`);
         };
     }
