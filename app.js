@@ -28,7 +28,7 @@ async function sendKeys(msg, filePath) {
         if (userKeys.length > 0) {
             let keysToSend = userKeys.slice(0, 4);
             keysToSend = keysToSend.map(key => `\`${key}\``);
-            bot.sendMessage(msg.chat.id, keysToSend), {
+            bot.sendMessage(msg.chat.id, keysToSend.join('\n\n'), {
                 parse_mode: 'Markdown',
                 reply_markup: {
                     inline_keyboard: [
@@ -40,7 +40,7 @@ async function sendKeys(msg, filePath) {
                         ]
                     ]
                 }
-            };
+            });
             keys[msg.chat.id] = userKeys.slice(4);
             fs.writeFileSync(filePath, JSON.stringify(keys, null, 2));
         }
@@ -161,9 +161,12 @@ async function generateAllKeys(msg) {
                 });
             }
         }
-        await Promise.all(activeTasks.map(task => task.promise));
-        messageIds.forEach(message => bot.deleteMessage(msg.chat.id, message.messageId));
-        bot.sendMessage(msg.chat.id, 'All Keys have been generated!');
+        activeTasks.map(task => task.promise.then(() => {
+            bot.sendMessage(msg.chat.id, `${task.getGame()} keys have been generated!`);
+            let toDeleteMsg = messageIds.find(message => message.keyType === task.getGame());
+            bot.deleteMessage(msg.chat.id, toDeleteMsg.messageId);
+            messageIds = messageIds.filter(message => message.keyType !== task.getGame());
+        }));
         informAdmin(msg, `${msg.chat.first_name} successfully generated all keys`);
     } catch (error) {
         console.error(error);
