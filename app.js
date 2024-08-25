@@ -149,12 +149,7 @@ async function generateAllKeys(msg) {
                 index++;
             }
             else {
-                if (index != tasks.length) {
-                    await Promise.race(activeTasks.map(task => task.promise));
-                }
-                else {
-                    await Promise.all(activeTasks.map(task => task.promise));
-                }
+                await Promise.race(activeTasks.map(task => task.promise));
                 activeTasks = activeTasks.filter(task => {
                     if (task.isPending()) { return true; }
                     else {
@@ -166,6 +161,8 @@ async function generateAllKeys(msg) {
                 });
             }
         }
+        await Promise.all(activeTasks.map(task => task.promise));
+        messageIds.forEach(message => bot.deleteMessage(msg.chat.id, message.messageId));
         bot.sendMessage(msg.chat.id, 'All Keys have been generated!');
         informAdmin(msg, `${msg.chat.first_name} successfully generated all keys`);
     } catch (error) {
