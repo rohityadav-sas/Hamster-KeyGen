@@ -202,14 +202,15 @@ bot.onText('/generatekeys', (msg) => {
     });
 });
 
-bot.on('callback_query', (callbackQuery) => {
+bot.on('callback_query', async (callbackQuery) => {
     const msg = callbackQuery.message;
     const data = callbackQuery.data;
     if (data.startsWith('generate')) {
         const game = data.replace('generate', '');
         if (game === 'All') { generateAllKeys(msg) } else {
             bot.sendMessage(msg.chat.id, `Generating ${game} keys...`);
-            getKeys(game, 4, msg.chat.id);
+            await getKeys(game, 4, msg.chat.id);
+            bot.sendMessage(msg.chat.id, `${game} keys have been generated!`);
         };
     }
     else if (data === 'delete') {
