@@ -149,7 +149,12 @@ async function generateAllKeys(msg) {
                 index++;
             }
             else {
-                await Promise.race(activeTasks.map(task => task.promise));
+                if (index != tasks.length) {
+                    await Promise.race(activeTasks.map(task => task.promise));
+                }
+                else {
+                    await Promise.all(activeTasks.map(task => task.promise));
+                }
                 activeTasks = activeTasks.filter(task => {
                     if (task.isPending()) { return true; }
                     else {
