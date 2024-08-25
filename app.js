@@ -27,9 +27,8 @@ async function sendKeys(msg, filePath) {
     if (userFound) {
         if (userKeys.length > 0) {
             let keysToSend = userKeys.slice(0, 4);
-            let listOfKeys = keysToSend.join('\n');
-            listOfKeys = listOfKeys.map(key => `\`${key}\``);
-            bot.sendMessage(msg.chat.id, listOfKeys), {
+            keysToSend = keysToSend.map(key => `\`${key}\``);
+            bot.sendMessage(msg.chat.id, keysToSend), {
                 parse_mode: 'Markdown',
                 reply_markup: {
                     inline_keyboard: [
