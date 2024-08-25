@@ -208,6 +208,7 @@ bot.onText('/generatekeys', (msg) => {
 });
 
 bot.on('callback_query', async (callbackQuery) => {
+    bot.answerCallbackQuery(callbackQuery.id);
     const msg = callbackQuery.message;
     const data = callbackQuery.data;
     if (data.startsWith('generate')) {
@@ -224,5 +225,4 @@ bot.on('callback_query', async (callbackQuery) => {
     else {
         sendKeys(msg, path.join(__dirname, 'Keys', `${data}_keys.json`));
     }
-    bot.answerCallbackQuery(callbackQuery.id);
 });
