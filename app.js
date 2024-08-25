@@ -27,21 +27,21 @@ async function sendKeys(msg, filePath) {
     if (userFound) {
         if (userKeys.length > 0) {
             let keysToSend = userKeys.slice(0, 4);
-            keysToSend.forEach(element => {
-                bot.sendMessage(msg.chat.id, `\`${element}\``, {
-                    parse_mode: 'Markdown',
-                    reply_markup: {
-                        inline_keyboard: [
-                            [
-                                {
-                                    text: '🗑️',
-                                    callback_data: 'delete'
-                                }
-                            ]
+            let listOfKeys = keysToSend.join('\n');
+            listOfKeys = listOfKeys.map(key => `\`${key}\``);
+            bot.sendMessage(msg.chat.id, listOfKeys), {
+                parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: '🗑️',
+                                callback_data: 'delete'
+                            }
                         ]
-                    }
-                });
-            });
+                    ]
+                }
+            };
             keys[msg.chat.id] = userKeys.slice(4);
             fs.writeFileSync(filePath, JSON.stringify(keys, null, 2));
         }
@@ -156,6 +156,7 @@ async function generateAllKeys(msg) {
                         bot.sendMessage(msg.chat.id, `${task.getGame()} keys have been generated!`);
                         let toDeleteMsg = messageIds.find(message => message.keyType === task.getGame());
                         bot.deleteMessage(msg.chat.id, toDeleteMsg.messageId);
+                        messageIds = messageIds.filter(message => message.keyType !== task.getGame());
                         return false;
                     }
                 });
