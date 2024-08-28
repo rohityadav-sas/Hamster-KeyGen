@@ -78,7 +78,7 @@ const commands = Object.entries(games).reduce((acc, [key, value]) => {
 
 const keysFiles = Object.entries(commands).map(([key, value]) => value);
 
-const sleepDuration = 60;
+let sleepDuration = 60;
 let sleepUnit = '';
 if (sleepDuration >= 60) {
     sleepDuration = (sleepDuration / 60).toFixed(2);
