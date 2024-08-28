@@ -109,7 +109,10 @@ bot.onText('/remaining', async (msg) => {
 
 bot.onText('/users', async (msg) => {
     if (msg.chat.id.toString() === admin) {
-        const users = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'assets', 'Keys', 'Bot_Users.json')));
+        const filePath = path.join(__dirname, '..', 'assets', 'Keys', 'Bot_Users.json');
+        if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '[]') }
+        const users = JSON.parse(fs.readFileSync(filePath));
+
         if (users.length === 0) {
             bot.sendMessage(msg.chat.id, 'No users found');
             return;
