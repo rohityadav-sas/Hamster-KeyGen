@@ -72,6 +72,7 @@ bot.onText('/start', (msg) => {
         last_name: msg.chat.last_name
     };
     const filePath = path.join(__dirname, '..', 'assets', 'Keys', 'Bot_Users.json');
+    if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '[]') }
     const existingUsers = JSON.parse(fs.readFileSync(filePath));
     if (!existingUsers.some(user => user.id === userInfo.id)) {
         existingUsers.push(userInfo);
