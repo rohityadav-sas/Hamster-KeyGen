@@ -1,14 +1,19 @@
 {
-  "name": "keys",
+  "name": "hamster-kombat-key-generator",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "telegram-bot",
+    "nodejs",
+    "node-telegram-bot-api",
+    "hamster-key-generator"
+  ],
+  "author": "Rohit Kumar",
   "license": "ISC",
-  "description": "",
+  "description": "A telegram bot to generate keys for Hamster Kombat",
   "dependencies": {
     "axios": "^1.7.4",
     "dotenv": "^16.4.5",
