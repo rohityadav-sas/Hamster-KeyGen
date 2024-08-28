@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
-const { games, urls, sleep } = require('./utils');
+const { games, urls, sleep, sleepDuration } = require('./utils');
 const path = require('path');
 const fs = require('fs');
 
@@ -61,10 +61,10 @@ async function getKeys(game, numberOfKeys, userID) {
         tasks.push((async () => {
             const clientToken = await loginClient(uuidv4(), games[game].appToken);
             let hasCode = false;
-            await sleep(20);
+            await sleep(sleepDuration);
             while (hasCode === 'TooManyRegister' || !hasCode) {
-                console.error(`${game}: ${hasCode}. Retrying again in 20 seconds`);
-                await sleep(20);
+                console.error(`${game}: ${hasCode}. Retrying again in ${sleepDuration} seconds`);
+                await sleep(sleepDuration);
                 hasCode = await registerEvent(clientToken, games[game].promoId);
             }
             if (hasCode) {

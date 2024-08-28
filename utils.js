@@ -78,4 +78,6 @@ const commands = Object.entries(games).reduce((acc, [key, value]) => {
 
 const keysFiles = Object.entries(commands).map(([key, value]) => value);
 
-module.exports = { games, urls, sleep, commands, keysFiles, TrackedPromise };
+const sleepDuration = 40;
+
+module.exports = { games, urls, sleep, commands, keysFiles, TrackedPromise, sleepDuration };

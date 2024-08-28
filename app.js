@@ -142,7 +142,7 @@ async function generateAllKeys(msg) {
                     keyType: keyTypes[index],
                     messageId: message.message_id
                 });
-                if (activeTasks.length != batchSize) { await sleep(10); }
+                if (activeTasks.length != batchSize) { await sleep(20); }
                 index++;
             }
             else {
