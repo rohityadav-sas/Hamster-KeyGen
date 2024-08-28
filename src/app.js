@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const { getKeys } = require('./tokenGeneration');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
@@ -71,7 +71,7 @@ bot.onText('/start', (msg) => {
         first_name: msg.chat.first_name,
         last_name: msg.chat.last_name
     };
-    const filePath = path.join(__dirname, 'Keys', 'Bot_Users.json');
+    const filePath = path.join(__dirname, '..', 'assets', 'Keys', 'Bot_Users.json');
     const existingUsers = JSON.parse(fs.readFileSync(filePath));
     if (!existingUsers.some(user => user.id === userInfo.id)) {
         existingUsers.push(userInfo);
@@ -84,7 +84,7 @@ bot.onText('/remaining', async (msg) => {
     const keys = [];
     let userFound = false;
     keysFiles.forEach(file => {
-        const filePath = path.join(__dirname, 'Keys', file);
+        const filePath = path.join(__dirname, '..', 'assets', 'Keys', file);
         if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '{}') }
         const data = JSON.parse(fs.readFileSync(filePath));
         for (const [key, value] of Object.entries(data)) {
@@ -108,7 +108,7 @@ bot.onText('/remaining', async (msg) => {
 
 bot.onText('/users', async (msg) => {
     if (msg.chat.id.toString() === admin) {
-        const users = JSON.parse(fs.readFileSync(path.join(__dirname, 'Keys', 'Bot_Users.json')));
+        const users = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'assets', 'Keys', 'Bot_Users.json')));
         if (users.length === 0) {
             bot.sendMessage(msg.chat.id, 'No users found');
             return;
@@ -125,6 +125,10 @@ bot.onText('/users', async (msg) => {
 });
 
 async function generateAllKeys(msg) {
+    let counting = 0;
+    setInterval(() => {
+        console.log(counting++);
+    }, 1000);
     const tasks = [];
     let batchSize = 2;
     const keyTypes = Object.keys(games);
@@ -222,6 +226,6 @@ bot.on('callback_query', async (callbackQuery) => {
         bot.deleteMessage(msg.chat.id, msg.message_id);
     }
     else {
-        sendKeys(msg, path.join(__dirname, 'Keys', `${data}_keys.json`));
+        sendKeys(msg, path.join(__dirname, '..', 'assets', 'Keys', `${data}_keys.json`));
     }
 });

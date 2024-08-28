@@ -78,11 +78,11 @@ const commands = Object.entries(games).reduce((acc, [key, value]) => {
 
 const keysFiles = Object.entries(commands).map(([key, value]) => value);
 
-let sleepDuration = 60;
+let sleepDuration = 20;
 let sleepUnit = '';
 if (sleepDuration >= 60) {
-    sleepDuration = (sleepDuration / 60).toFixed(2);
-    sleepUnit = (sleepDuration > 1) ? 'minutes' : 'minute';
+    let tempVar = (sleepDuration / 60).toFixed(2);
+    sleepUnit = (tempVar > 1) ? 'minutes' : 'minute';
 }
 
 module.exports = { games, urls, sleep, commands, keysFiles, TrackedPromise, sleepDuration, sleepUnit };

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node --watch app.js --watch tokenGeneration.js test.js"
+    "start": "node src/app.js"
   },
   "keywords": [],
   "author": "",

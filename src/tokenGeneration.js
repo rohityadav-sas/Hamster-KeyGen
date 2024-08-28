@@ -48,12 +48,12 @@ const createToken = async (clientToken, promoId) => {
         const response = await axios.post(urls.createToken, payload, { headers });
         return response.data.promoCode;
     } catch (error) {
-        throw new Error("Error generating Promo Code");
+        return ("Error generating Promo Code");
     }
 };
 
 async function getKeys(game, numberOfKeys, userID) {
-    const filePath = path.join(__dirname, 'Keys', `${game}_keys.json`);
+    const filePath = path.join(__dirname, '..', 'assets', 'Keys', `${game}_keys.json`);
     if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '{}') }
     const tasks = [];
     let generatedKeys = [];
@@ -69,7 +69,12 @@ async function getKeys(game, numberOfKeys, userID) {
             }
             if (hasCode) {
                 const key = await createToken(clientToken, games[game].promoId);
-                generatedKeys.push(key);
+                if (key !== 'Error generating Promo Code') {
+                    generatedKeys.push(key);
+                }
+                else {
+                    console.log(key);
+                }
             }
         })());
     }
