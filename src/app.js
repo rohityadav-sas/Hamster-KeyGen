@@ -125,10 +125,6 @@ bot.onText('/users', async (msg) => {
 });
 
 async function generateAllKeys(msg) {
-    let counting = 0;
-    setInterval(() => {
-        console.log(counting++);
-    }, 1000);
     const tasks = [];
     let batchSize = 2;
     const keyTypes = Object.keys(games);
