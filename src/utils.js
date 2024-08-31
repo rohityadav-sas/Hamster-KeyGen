@@ -33,7 +33,7 @@ const games = {
     },
     'Zoopolis': {
         appToken: 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
-        promoId: '43e35910-c168-4634-ad4f-52fd764a843f'
+        promoId: 'b2436c89-e0aa-4aed-8046-9b0515e1c46b'
     }
 }
 const urls = {
