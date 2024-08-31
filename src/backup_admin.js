@@ -6,6 +6,7 @@ const fs = require('fs');
 const express = require('express');
 const app = express();
 const axios = require('axios');
+const admin = '7070127929';
 const { games, commands, keysFiles, sleep, TrackedPromise, sleepDuration } = require('./utils');
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
@@ -52,6 +53,16 @@ async function sendKeys(msg, filePath) {
     }
 }
 
+const informAdmin = (msg, msgToSend) => {
+    if ((msg.chat.id).toString() !== admin) {
+        bot.sendMessage(admin, msgToSend);
+    }
+}
+
+bot.onText(new RegExp('.'), (msg) => {
+    informAdmin(msg, `${msg.chat.first_name} sent a message: ${msg.text}`);
+});
+
 bot.onText('/start', (msg) => {
     bot.sendMessage(msg.chat.id, 'Welcome to the Hamster Key Generator Bot!');
     const userInfo = {
@@ -67,6 +78,7 @@ bot.onText('/start', (msg) => {
         existingUsers.push(userInfo);
         fs.writeFileSync(filePath, JSON.stringify(existingUsers, null, 2));
     }
+    informAdmin(msg, `${msg.chat.first_name} started the bot`);
 });
 
 bot.onText('/remaining', async (msg) => {
@@ -92,6 +104,28 @@ bot.onText('/remaining', async (msg) => {
         });
         bot.sendMessage(msg.chat.id, keys.join('\n'));
     }
+    informAdmin(msg, `${msg.chat.first_name} requested remaining keys`);
+});
+
+bot.onText('/users', async (msg) => {
+    if (msg.chat.id.toString() === admin) {
+        const filePath = path.join(__dirname, '..', 'assets', 'Keys', 'Bot_Users.json');
+        if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '[]') }
+        const users = JSON.parse(fs.readFileSync(filePath));
+
+        if (users.length === 0) {
+            bot.sendMessage(msg.chat.id, 'No users found');
+            return;
+        }
+        const list = users.map(user =>
+            `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}${user.username ? `: @${user.username}` : ''}`
+        );
+        bot.sendMessage(msg.chat.id, list.join('\n'));
+    }
+    else {
+        bot.sendMessage(msg.chat.id, 'Only admin can use this command');
+        bot.sendMessage(admin, `${msg.chat.first_name} tried to access users list`);
+    }
 });
 
 async function generateAllKeys(msg) {
@@ -101,6 +135,7 @@ async function generateAllKeys(msg) {
     for (const keyType of keyTypes) {
         tasks.push(() => new TrackedPromise(getKeys(keyType, 4, msg.chat.id), keyType));
     }
+    informAdmin(msg, `${msg.chat.first_name} requested to generate all keys`);
     try {
         let activeTasks = [], index = 0, messageIds = [];
         while (index < tasks.length) {
@@ -134,6 +169,7 @@ async function generateAllKeys(msg) {
             bot.deleteMessage(msg.chat.id, toDeleteMsg.messageId);
             messageIds = messageIds.filter(message => message.keyType !== task.getGame());
         }));
+        informAdmin(msg, `${msg.chat.first_name} successfully generated all keys`);
     } catch (error) {
         console.error(error);
         bot.sendMessage(msg.chat.id, 'Error generating keys: ' + error);
