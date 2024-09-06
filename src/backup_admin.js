@@ -122,7 +122,7 @@ bot.onText('generateAllKeys', async (msg) => {
         const remainingHours = Math.floor(remainingTimeMs / (60 * 60 * 1000));
         const remainingMinutes = Math.floor((remainingTimeMs % (60 * 60 * 1000)) / (60 * 1000));
 
-        await bot.sendMessage(msg.chat.id, `You can only generate keys once every 12 hours. Please wait ${remainingHours} hours and ${remainingMinutes} minutes.`);
+        await bot.sendMessage(msg.chat.id, `You can only generate keys once every 12 hours.\nPlease wait ${remainingHours} hours and ${remainingMinutes} minutes.`);
         return;
     }
     await updateLastGenerationTime(userId, now);
