@@ -27,7 +27,6 @@ The Hamster Key Generator Bot is a Telegram bot that generates and manages promo
 - **Retrieve Keys**: Retrieve generated keys for a specific game.
 - **Admin Commands**: Admin can view all users and their remaining keys.
 - **User Management**: Automatically tracks users who start the bot.
-- **Backup Admin**: A backup admin receives all messages sent to the bot.
 - **Rate Limiting**: Users can only generate keys once every 12 hours.
 
 ## Prerequisites
@@ -68,8 +67,12 @@ The Hamster Key Generator Bot is a Telegram bot that generates and manages promo
 ### Telegram Commands
 
 - **/start**: Start the bot and register the user.
+- **/singlemode**: Choose a game to generate keys for in single mode.
+- **/multimode**: Choose an option to get all keys, generate all keys, or view remaining keys.
+- **/users**: Admin command to view all users and their remaining keys.
 - **getAllKeys**: Retrieve all keys for the user.
 - **generateAllKeys**: Generate all keys for the user.
+- **Remaining**: View the remaining keys for each game.
 
 ## Dependencies
 
