@@ -1,35 +1,28 @@
+const fs = require('fs').promises;
 const games = {
     'Cube': {
         appToken: 'd1690a07-3780-4068-810f-9b5bbf2931b2',
         promoId: 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
     },
-    'Train': {
-        appToken: '82647f43-3f87-402d-88dd-09a90025313f',
-        promoId: 'c4480ac7-e178-4973-8061-9ed5b2e17954',
+    'Polysphere': {
+        appToken: '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
+        promoId: '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71'
     },
     'Merge': {
         appToken: '8d1cc2ad-e097-4b86-90ef-7a27e19fb833',
         promoId: 'dc128d28-c45b-411c-98ff-ac7726fbaea4',
     },
-    'Twerk': {
-        appToken: '61308365-9d16-4040-8bb0-2f4a4c69074c',
-        promoId: '61308365-9d16-4040-8bb0-2f4a4c69074c'
-    },
-    'Polysphere': {
-        appToken: '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
-        promoId: '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71'
-    },
     'Mow': {
         appToken: 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         promoId: 'ef319a80-949a-492e-8ee0-424fb5fc20a6'
     },
-    'Cafe': {
-        appToken: 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
-        promoId: 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11'
+    'Twerk': {
+        appToken: '61308365-9d16-4040-8bb0-2f4a4c69074c',
+        promoId: '61308365-9d16-4040-8bb0-2f4a4c69074c'
     },
-    'Gang': {
-        appToken: 'b6de60a0-e030-48bb-a551-548372493523',
-        promoId: 'c7821fa7-6632-482c-9635-2bd5798585f9'
+    'Train': {
+        appToken: '82647f43-3f87-402d-88dd-09a90025313f',
+        promoId: 'c4480ac7-e178-4973-8061-9ed5b2e17954',
     },
     'Zoopolis': {
         appToken: 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
@@ -42,6 +35,10 @@ const games = {
     'Tile': {
         appToken: 'e68b39d2-4880-4a31-b3aa-0393e7df10c7',
         promoId: 'e68b39d2-4880-4a31-b3aa-0393e7df10c7'
+    },
+    'Stone': {
+        appToken: '04ebd6de-69b7-43d1-9c4b-04a6ca3305af',
+        promoId: '04ebd6de-69b7-43d1-9c4b-04a6ca3305af'
     }
 
 }
@@ -51,47 +48,28 @@ const urls = {
     createToken: 'https://api.gamepromo.io/promo/create-code'
 }
 
-const sleep = async (time) => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve();
-        }, time * 1000);
-    })
-};
+const sleep = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
 
-class TrackedPromise {
-    constructor(promise, game) {
-        this.state = 'pending';
-        this.game = game;
-        this.promise = promise.then(value => {
-            this.state = 'fulfilled';
-            return value;
-        }).catch(error => {
-            this.state = 'rejected';
-            throw error;
-        });
-    }
-    isPending() {
-        return this.state === 'pending';
-    }
-    getGame() {
-        return this.game;
-    }
-} // To check if a promise is still pending
 
-const commands = Object.entries(games).reduce((acc, [key, value]) => {
-    key = key.charAt(0).toLowerCase() + key.slice(1);
-    acc[`/${key}`] = `${key.charAt(0).toUpperCase() + key.slice(1)}_keys.json`;
+const commands = Object.keys(games).reduce((acc, game) => {
+    const formattedGame = game.charAt(0).toLowerCase() + game.slice(1);
+    acc[`/${formattedGame}`] = `${formattedGame.charAt(0).toUpperCase() + formattedGame.slice(1)}_keys.json`;
     return acc;
 }, {});
 
-const keysFiles = Object.entries(commands).map(([key, value]) => value);
+const keysFiles = Object.values(commands);
 
-let sleepDuration = 20;
-let sleepUnit = '';
-if (sleepDuration >= 60) {
-    let tempVar = (sleepDuration / 60).toFixed(2);
-    sleepUnit = (tempVar > 1) ? 'minutes' : 'minute';
+async function ensureFileExists(filePath) {
+    try {
+        await fs.access(filePath);
+    } catch {
+        await fs.writeFile(filePath, '{}');
+    }
 }
 
-module.exports = { games, urls, sleep, commands, keysFiles, TrackedPromise, sleepDuration, sleepUnit };
+const sleepDuration = 20;
+const sleepUnit = sleepDuration >= 60
+    ? (sleepDuration / 60).toFixed(2) > 1 ? 'minutes' : 'minute'
+    : '';
+
+module.exports = { games, urls, sleep, commands, keysFiles, sleepDuration, sleepUnit, ensureFileExists };
