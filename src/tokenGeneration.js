@@ -64,7 +64,7 @@ async function generateKeys(game, numberOfKeys) {
         let item = async () => {
             try {
                 const clientToken = await loginClient(uuidv4(), games[game].appToken);
-                console.log(`\x1b[33mGenerating key ${i + 1}/${numberOfKeys} key for ${game}...${(i == 3) ? '\n' : ''}\x1b[0m`);
+                console.log(`\x1b[33mGenerating ${i + 1}/${numberOfKeys} key for ${game}...${(i == 3) ? '\n' : ''}\x1b[0m`);
                 let hasCode;
                 do {
                     await sleep(sleepDuration);
