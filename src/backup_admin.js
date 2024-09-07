@@ -190,7 +190,8 @@ async function sendKeys(msg, filePath, noKeysMsg) {
     const gameType = path.basename(filePath, '_keys.json');
 
     if (userKeys.length > 0) {
-        const keysToSend = userKeys.slice(0, 4).map(key => `\`${key}\``);
+        const numberOfKeysToSend = (gameType === 'Fluff') ? 8 : 4;
+        const keysToSend = userKeys.slice(0, numberOfKeysToSend).map(key => `\`${key}\``);
         await bot.sendMessage(msg.chat.id, `*Here are your ${gameType} keys:*\n\n${keysToSend.join('\n\n')}`, {
             parse_mode: 'MarkdownV2'
         });
