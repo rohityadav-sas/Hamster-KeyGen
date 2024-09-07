@@ -42,7 +42,7 @@ bot.onText('/multimode', async (msg) => {
     const keyboardOptions = {
         reply_markup: {
             keyboard: [
-                ['getAllKeys', 'generateAllKeys'],
+                ['🔄 Get Keys', 'generateAllKeys'],
                 ['Remaining']
             ],
             resize_keyboard: true
@@ -76,7 +76,7 @@ bot.onText('/start', async (msg) => {
     const keyboardOptions = {
         reply_markup: {
             keyboard: [
-                ['getAllKeys', 'generateAllKeys'],
+                ['🔄 Get Keys', '🔄 Generate All Keys'],
                 ['Remaining']
             ],
             resize_keyboard: true
@@ -111,7 +111,7 @@ bot.onText('Remaining', async (msg) => {
     await bot.sendMessage(msg.chat.id, keys.join('\n'));
 });
 
-bot.onText('generateAllKeys', async (msg) => {
+bot.onText('🔄 Generate All Keys', async (msg) => {
     const userId = msg.chat.id.toString();
     const lastGeneration = await getLastGenerationTime(userId);
     const now = Date.now();
@@ -164,7 +164,7 @@ async function generateAllKeys(msg) {
     }
 }
 
-bot.onText('getAllKeys', async (msg) => {
+bot.onText('🔄 Get Keys', async (msg) => {
     const noKeysMsg = [];
 
     const promises = keysFiles.map(file => {
