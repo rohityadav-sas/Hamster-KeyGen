@@ -18,7 +18,7 @@ The Hamster Key Generator Bot is a Telegram bot that generates and manages promo
 
 <div style="display:flex; justify-content:space-between">
   <img src="./assets/preview1.png?raw=true" height="100%" width="45%"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
-  <img src="./assets/preview3.png?raw=true" height="100%" width="45%"/>
+  <img src="./assets/preview2.png?raw=true" height="100%" width="45%"/>
 </div>
 
 ## Features
