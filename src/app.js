@@ -2,86 +2,128 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const { getKeys } = require('./tokenGeneration');
 const TelegramBot = require('node-telegram-bot-api');
-const fs = require('fs');
+const fs = require('fs').promises;
 const express = require('express');
 const app = express();
-const { games, keysFiles } = require('./utils');
+const { games, keysFiles, ensureFileExists } = require('./utils');
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const lastGenerationFile = path.join(__dirname, '..', 'assets', 'lastGeneration.json');
-const generationInterval = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+const userFile = path.join(__dirname, '..', 'assets', 'users.json');
+const generationInterval = 12 * 60 * 60 * 1000;
 
 app.listen(3000, () => {
     console.log('\x1b[32m%s\x1b[0m', `Server running on port 3000`);
 })
 
-bot.onText('/start', (msg) => {
-    const welcomeMessage = 'Welcome to the Hamster Key Generator Bot!';
+bot.onText('/singlemode', async (msg) => {
+    const gameOptions = Object.keys(games)
+        .map((game, index) => (index % 3 === 0 ? Object.keys(games).slice(index, index + 3) : null))
+        .filter(item => item);
+    const keyboardOptions = {
+        reply_markup: {
+            keyboard: gameOptions,
+            resize_keyboard: true
+        }
+    };
+    bot.sendMessage(msg.chat.id, 'Choose a game:', keyboardOptions);
+});
+
+bot.onText('/multimode', async (msg) => {
     const keyboardOptions = {
         reply_markup: {
             keyboard: [
-                ['getAllKeys', 'generateAllKeys', 'Remaining']
+                ['🔄 Get Keys', '🔄 Generate All Keys'],
+                ['Remaining']
             ],
             resize_keyboard: true
         }
     };
-
-    bot.sendMessage(msg.chat.id, welcomeMessage, keyboardOptions);
+    bot.sendMessage(msg.chat.id, 'Choose an option:', keyboardOptions);
 });
 
+Object.keys(games).forEach(game => {
+    bot.onText(`${game}`, async (msg) => {
+        await bot.sendMessage(msg.chat.id, `Generating ${game} keys...`);
+        await getKeys(game, 4, msg.chat.id);
+        await bot.sendMessage(msg.chat.id, `${game} keys have been generated!`);
+    });
+});
+
+
+bot.onText('/users', async (msg) => {
+    await ensureFileExists(userFile);
+    const users = JSON.parse(await fs.readFile(userFile, 'utf-8'));
+    const userList = Object.values(users).map(user => `${user.first_name} ${user.last_name ? user.last_name : ''} (@${user.username ? user.username : 'no username'})`).join('\n');
+    await bot.sendMessage(msg.chat.id, userList);
+});
+
+bot.onText('/start', async (msg) => {
+    const welcomeMessage = 'Welcome to the Hamster Key Generator Bot!';
+    const keyboardOptions = {
+        reply_markup: {
+            keyboard: [
+                ['🔄 Get Keys', '🔄 Generate All Keys'],
+                ['Remaining']
+            ],
+            resize_keyboard: true
+        }
+    };
+    const userData = {
+        first_name: msg.chat.first_name,
+        last_name: msg.chat.last_name,
+        username: msg.chat.username
+    }
+    await ensureFileExists(userFile);
+    const users = JSON.parse(await fs.readFile(userFile, 'utf-8'));
+    let userId = msg.chat.id.toString();
+    users[userId] = userData;
+    await fs.writeFile(userFile, JSON.stringify(users, null, 2));
+    bot.sendMessage(msg.chat.id, welcomeMessage, keyboardOptions);
+});
 
 bot.onText('Remaining', async (msg) => {
     const userId = msg.chat.id.toString();
     const keys = [];
 
-    keysFiles.forEach(file => {
+    const fileProcessingPromises = keysFiles.map(async (file) => {
         const filePath = path.join(__dirname, '..', 'assets', 'Keys', file);
-
-        if (!fs.existsSync(filePath)) { fs.writeFileSync(filePath, '{}') }
-
-        const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-
-        const userKeys = data[userId];
-        const keyCount = userKeys ? userKeys.length : 0;
+        await ensureFileExists(filePath);
+        const data = JSON.parse(await fs.readFile(filePath, 'utf-8'));
+        const userKeys = data[userId] || [];
+        const keyCount = userKeys.length;
         keys.push(`${file.replace('_keys.json', '')}: ${keyCount}`);
     });
-
-    bot.sendMessage(msg.chat.id, keys.join('\n'));
+    await Promise.all(fileProcessingPromises);
+    await bot.sendMessage(msg.chat.id, keys.join('\n'));
 });
 
-
-bot.onText('generateAllKeys', async (msg) => {
+bot.onText('🔄 Generate All Keys', async (msg) => {
     const userId = msg.chat.id.toString();
-    const lastGeneration = getLastGenerationTime(userId);
-
+    const lastGeneration = await getLastGenerationTime(userId);
     const now = Date.now();
-    if (now - lastGeneration < generationInterval) {
-        const remainingTime = ((generationInterval - (now - lastGeneration)) / (60 * 60 * 1000)).toFixed(2);
-        await bot.sendMessage(msg.chat.id, `You can only generate keys once every 12 hours. Please wait ${remainingTime} hours.`);
+    if ((now - lastGeneration) < generationInterval) {
+        const remainingTimeMs = generationInterval - (now - lastGeneration);
+        const remainingHours = Math.floor(remainingTimeMs / (60 * 60 * 1000));
+        const remainingMinutes = Math.floor((remainingTimeMs % (60 * 60 * 1000)) / (60 * 1000));
+
+        await bot.sendMessage(msg.chat.id, `You can only generate keys once every 12 hours.\nPlease wait ${remainingHours} hours and ${remainingMinutes} minutes.`);
         return;
     }
-
-    updateLastGenerationTime(userId, now);
-
+    await updateLastGenerationTime(userId, now);
     await generateAllKeys(msg);
 });
 
-function getLastGenerationTime(userId) {
-    if (!fs.existsSync(lastGenerationFile)) {
-        fs.writeFileSync(lastGenerationFile, '{}');
-    }
-
-    const lastGenerationData = JSON.parse(fs.readFileSync(lastGenerationFile, 'utf-8'));
+async function getLastGenerationTime(userId) {
+    await ensureFileExists(lastGenerationFile);
+    const lastGenerationData = JSON.parse(await fs.readFile(lastGenerationFile, 'utf-8'));
     return lastGenerationData[userId] || 0;
 }
 
-function updateLastGenerationTime(userId, timestamp) {
-    let lastGenerationData = {};
-    if (fs.existsSync(lastGenerationFile)) {
-        lastGenerationData = JSON.parse(fs.readFileSync(lastGenerationFile, 'utf-8'));
-    }
-
+async function updateLastGenerationTime(userId, timestamp) {
+    await ensureFileExists(lastGenerationFile);
+    let lastGenerationData = JSON.parse(await fs.readFile(lastGenerationFile, 'utf-8'));
     lastGenerationData[userId] = timestamp;
-    fs.writeFileSync(lastGenerationFile, JSON.stringify(lastGenerationData, null, 2));
+    await fs.writeFile(lastGenerationFile, JSON.stringify(lastGenerationData, null, 2));
 }
 
 async function generateAllKeys(msg) {
@@ -108,8 +150,7 @@ async function generateAllKeys(msg) {
     }
 }
 
-
-bot.onText('getAllKeys', async (msg) => {
+bot.onText('🔄 Get Keys', async (msg) => {
     const noKeysMsg = [];
 
     const promises = keysFiles.map(file => {
@@ -120,28 +161,29 @@ bot.onText('getAllKeys', async (msg) => {
     await Promise.all(promises);
 
     if (noKeysMsg.length > 0) {
-        await bot.sendMessage(msg.chat.id, noKeysMsg.join('\n\n'));
+        await bot.sendMessage(msg.chat.id,
+            `🚫 *You don't have these game keys\\. Generate them first\\:*\n\n${noKeysMsg.join('\n')}`,
+            { parse_mode: 'MarkdownV2' }
+        );
     }
 });
 
 async function sendKeys(msg, filePath, noKeysMsg) {
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, '{}');
-    }
-
-    const keys = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    await ensureFileExists(filePath);
+    const keys = JSON.parse(await fs.readFile(filePath, 'utf-8'));
     const userId = msg.chat.id.toString();
     const userKeys = keys[userId] || [];
     const gameType = path.basename(filePath, '_keys.json');
 
     if (userKeys.length > 0) {
-        const keysToSend = userKeys.slice(0, 4).map(key => `\`${key}\``);
-        await bot.sendMessage(msg.chat.id, `Here are your ${gameType} keys:\n\n${keysToSend.join('\n\n')}`, {
-            parse_mode: 'Markdown'
+        const numberOfKeysToSend = (gameType === 'Fluff') ? 8 : 4;
+        const keysToSend = userKeys.slice(0, numberOfKeysToSend).map(key => `\`${key}\``);
+        await bot.sendMessage(msg.chat.id, `*Here are your ${gameType} keys:*\n\n${keysToSend.join('\n\n')}`, {
+            parse_mode: 'MarkdownV2'
         });
         keys[userId] = userKeys.slice(4);
-        fs.writeFileSync(filePath, JSON.stringify(keys, null, 2));
+        await fs.writeFile(filePath, JSON.stringify(keys, null, 2));
     } else {
-        noKeysMsg.push(`No ${gameType} keys left!`);
+        noKeysMsg.push(`${gameType}`);
     }
 }
