@@ -39,7 +39,7 @@ The Hamster Key Generator Bot is a Telegram bot that generates and manages promo
 
 1. Clone the repository:
     ```sh
-    https://github.com/rohityadav-sas/Hamster-KeyGen.git
+    git clone https://github.com/rohityadav-sas/Hamster-KeyGen.git
     ```
 
 2. Navigate to the project directory:
