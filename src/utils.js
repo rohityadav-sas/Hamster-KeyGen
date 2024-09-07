@@ -48,6 +48,9 @@ const urls = {
     createToken: 'https://api.gamepromo.io/promo/create-code'
 }
 
+const admin = '7070127929';
+// const admin = '5548580608';
+
 const sleep = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
 
 
@@ -72,4 +75,4 @@ const sleepUnit = sleepDuration >= 60
     ? (sleepDuration / 60).toFixed(2) > 1 ? 'minutes' : 'minute'
     : '';
 
-module.exports = { games, urls, sleep, commands, keysFiles, sleepDuration, sleepUnit, ensureFileExists };
+module.exports = { games, urls, sleep, commands, keysFiles, sleepDuration, sleepUnit, ensureFileExists, admin };
