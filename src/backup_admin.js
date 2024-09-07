@@ -42,7 +42,7 @@ bot.onText('/multimode', async (msg) => {
     const keyboardOptions = {
         reply_markup: {
             keyboard: [
-                ['🔄 Get Keys', 'generateAllKeys'],
+                ['🔄 Get Keys', '🔄 Generate All Keys'],
                 ['Remaining']
             ],
             resize_keyboard: true
