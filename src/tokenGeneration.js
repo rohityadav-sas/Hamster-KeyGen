@@ -53,7 +53,6 @@ async function getKeys(game, numberOfKeys, userID) {
     let existingKeys = JSON.parse(await fs.readFile(filePath, 'utf-8'));
     existingKeys[userID] = (existingKeys[userID] || []).concat(generatedKeys);
     await fs.writeFile(filePath, JSON.stringify(existingKeys, null, 2));
-    console.log('\x1b[32m%s\x1b[0m', `${game} keys generated`);
 }
 
 async function generateKeys(game, numberOfKeys) {
