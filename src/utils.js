@@ -45,9 +45,9 @@ const games = {
 'bc72d3b9-8e91-4884-9c33-f72482f0db37',
         promoId:
 'bc72d3b9-8e91-4884-9c33-f72482f0db37'
-    };
+    }
+};
 
-}
 const urls = {
     login: 'https://api.gamepromo.io/promo/login-client',
     register: 'https://api.gamepromo.io/promo/register-event',
