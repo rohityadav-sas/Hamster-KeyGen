@@ -49,7 +49,6 @@ const urls = {
 }
 
 const admin = '7070127929';
-// const admin = '5548580608';
 
 const sleep = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
 
