@@ -195,7 +195,7 @@ async function sendKeys(msg, filePath, noKeysMsg) {
         await bot.sendMessage(msg.chat.id, `*Here are your ${gameType} keys:*\n\n${keysToSend.join('\n\n')}`, {
             parse_mode: 'MarkdownV2'
         });
-        keys[userId] = userKeys.slice(4);
+        keys[userId] = userKeys.slice(numberOfKeysToSend);
         await fs.writeFile(filePath, JSON.stringify(keys, null, 2));
     } else {
         noKeysMsg.push(`${gameType}`);
