@@ -124,7 +124,7 @@ bot.onText('🔄 Generate All Keys', async (msg) => {
             `🚫 *Key Generation Limit Reached*\n` +
             `You can only generate keys every *12 hours*\\.\n\n` +
             `⏳ Time remaining: *${remainingHours}h ${remainingMinutes}m*\n\n` +
-            `💡 *Tip*: Set a reminder to check back once the cooldown is over!`
+            `💡 *Tip*: Set a reminder to check back once the cooldown is over\\!`
             , {
                 parse_mode: 'MarkdownV2'
             });
