@@ -184,10 +184,10 @@ bot.onText('🔄 Get Keys', async (msg) => {
     if (noKeysMsg.length > 0) {
         await bot.sendMessage(
             msg.chat.id,
-            `🚫 *Missing Game Keys*\n` +
+            `🚫 *Missing Game Keys*\n\n` +
             `It seems like you haven't generated the following game keys yet:\n\n` +
             `🔑 ${noKeysMsg.join('\n🔑 ')}` + // Add key emoji before each missing key
-            `\n\n❗ *Please generate these keys first.*`,
+            `\n\n❗ *Please generate these keys first\\.*`,
             { parse_mode: 'MarkdownV2' }
         );
     }
