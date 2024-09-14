@@ -182,8 +182,12 @@ bot.onText('🔄 Get Keys', async (msg) => {
     await Promise.all(promises);
 
     if (noKeysMsg.length > 0) {
-        await bot.sendMessage(msg.chat.id,
-            `🚫 *You don't have these game keys\\. Generate them first\\:*\n\n${noKeysMsg.join('\n')}`,
+        await bot.sendMessage(
+            msg.chat.id,
+            `🚫 *Missing Game Keys*\n` +
+            `It seems like you haven't generated the following game keys yet:\n\n` +
+            `🔑 ${noKeysMsg.join('\n🔑 ')}` + // Add key emoji before each missing key
+            `\n\n❗ *Please generate these keys first.*`,
             { parse_mode: 'MarkdownV2' }
         );
     }
