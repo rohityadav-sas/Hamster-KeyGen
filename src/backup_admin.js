@@ -121,8 +121,10 @@ bot.onText('🔄 Generate All Keys', async (msg) => {
         const remainingMinutes = Math.floor((remainingTimeMs % (60 * 60 * 1000)) / (60 * 1000));
         await bot.sendMessage(
             msg.chat.id,
-            `⏳ You can only generate keys once every 12 hours.\n` +
-            `Please wait ${remainingHours} hours and ${remainingMinutes} minutes before trying again.`
+            `🚫 *Key Generation Limit Reached*\n` +
+            `You can only generate keys every *12 hours*.\n\n` +
+            `⏳ _Time remaining:_ *${remainingHours}h ${remainingMinutes}m*\n\n` +
+            `💡 *Tip*: Set a reminder to check back once the cooldown is over!`
         );
         return;
     }
