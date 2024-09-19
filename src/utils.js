@@ -47,6 +47,14 @@ const games = {
     'Hide': {
         appToken: '4bf4966c-4d22-439b-8ff2-dc5ebca1a600',
         promoId: '4bf4966c-4d22-439b-8ff2-dc5ebca1a600'
+    },
+    'Pin': {
+        appToken: 'd2378baf-d617-417a-9d99-d685824335f0',
+        promoId: 'd2378baf-d617-417a-9d99-d685824335f0'
+    },
+    'Count': {
+        appToken: '4bdc17da-2601-449b-948e-f8c7bd376553',
+        promoId: '4bdc17da-2601-449b-948e-f8c7bd376553'
     }
 };
 
