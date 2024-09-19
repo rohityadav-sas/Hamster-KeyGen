@@ -55,7 +55,16 @@ const games = {
     'Count': {
         appToken: '4bdc17da-2601-449b-948e-f8c7bd376553',
         promoId: '4bdc17da-2601-449b-948e-f8c7bd376553'
+    },
+    'Among': {
+        appToken: 'daab8f83-8ea2-4ad0-8dd5-d33363129640',
+        promoId: 'daab8f83-8ea2-4ad0-8dd5-d33363129640'
+    },
+    'Factory': {
+        appToken: 'd02fc404-8985-4305-87d8-32bd4e66bb16',
+        promoId: 'd02fc404-8985-4305-87d8-32bd4e66bb16'
     }
+
 };
 
 const urls = {
