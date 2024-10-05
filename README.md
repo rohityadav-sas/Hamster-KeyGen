@@ -1,5 +1,9 @@
-# Hamster Key Generator Bot
+# ⚠️ **_DEPRECATED_** ⚠️
+![Deprecated](https://img.shields.io/badge/status-deprecated-red)
 
+This repository is no longer actively maintained, but **pull requests for bug fixes or improvements are still welcome**.
+
+# Hamster Key Generator Bot
 The Hamster Key Generator Bot is a Telegram bot that generates and manages promo keys for various games. It uses a combination of Express.js for the server, Axios for HTTP requests, and the `node-telegram-bot-api` library to interact with Telegram.
 
 ## Table of Contents

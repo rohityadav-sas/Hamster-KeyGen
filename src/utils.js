@@ -68,7 +68,6 @@ const games = {
         appToken: 'eb518c4b-e448-4065-9d33-06f3039f0fcb',
         promoId: 'eb518c4b-e448-4065-9d33-06f3039f0fcb'
     }
-
 };
 
 const urls = {
